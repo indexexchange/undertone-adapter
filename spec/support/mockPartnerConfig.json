@@ -3,18 +3,21 @@
     "xSlots": {
         "1": {
             "placementId": "54321",
+            "publisherId" : 12345,
             "sizes": [
-                [300, 250]
+                [1,1]
             ]
         },
         "2": {
             "placementId": "12345",
+            "publisherId" : 12345,
             "sizes": [
                 [300, 600]
             ]
         },
         "3": {
             "placementId": "654321",
+            "publisherId" : 12345,
             "sizes": [
                 [728, 90]
             ]
