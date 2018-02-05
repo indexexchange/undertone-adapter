@@ -64,8 +64,9 @@ function getExpectedAdEntry(mockData) {
     for(var i = 0; i < mockData.length; i++) {
         expectedAdEntry[i] = {};
 
-        expectedAdEntry[i].price = mockData[i].price;
-        expectedAdEntry[i].dealId = mockData[i].dealid;
+        expectedAdEntry[i].price = mockData[i].cpm;
+        expectedAdEntry[i].adm = mockData[i].ad;
+        expectedAdEntry[i].size = [mockData[i].width, mockData[i].height];
     }
 
     return expectedAdEntry;
@@ -164,7 +165,7 @@ describe('parseResponse', function () {
                             }
                         },
                         price: {
-                            type: 'number'
+                            type: 'number',
                         },
                         size: {
                             type: 'array',
@@ -191,14 +192,75 @@ describe('parseResponse', function () {
                 /* IF MRA, parse one parcel at a time */
                 if (!partnerProfile.architecture) partnerModule.parseResponse(1, mockData[i], [returnParcels[i]]);
 
-                /* Add test cases to test against each of the parcel's set fields
-                 * to make sure the response was parsed correctly.
-                 *
-                 * The parcels have already been parsed and should contain all the
-                 * necessary demand.
-                 */
-
                 expect(returnParcels[i]).to.exist;
+
+                var result = inspector.validate({
+                    type: 'object',
+                    properties: {
+                        targetingType: {
+                            type: 'string',
+                            eq: 'slot'
+                        },
+                        targeting: {
+                            type: 'object',
+                            properties: {
+                                [partnerModule.profile.targetingKeys.id]: {
+                                    type: 'array',
+                                    exactLength: 1,
+                                    items: {
+                                        type: 'string',
+                                        minLength: 1
+                                    }
+                                },
+                                [partnerModule.profile.targetingKeys.om]: {
+                                    type: 'array',
+                                    exactLength: 1,
+                                    items: {
+                                        type: 'string',
+                                        minLength: 1
+                                    },
+                                    exec: function (shema, post) {
+                                        var expectedValue = mockData[i].width + "x" + mockData[i].height + "_" + mockData[i].cpm;
+                                        if (post[0] !== expectedValue) {
+                                            this.report('the targeting key om value: ' + post + ' is incorrect!');
+                                        }
+                                    }
+                                },
+                                pubKitAdId: {
+                                    type: 'string',
+                                    minLength: 1
+                                }
+                            }
+                        },
+                        price: {
+                            type: 'number',
+                            eq: mockData[i].cpm,
+                            error: "bid price incorrect",
+                        },
+                        size: {
+                            type: 'array',
+                            exec: function (shema, post) {
+                                var expectedValue = [mockData[i].width, mockData[i].height];
+                                if (post[0] !== expectedValue[0] || post[1] !== expectedValue[1]) {
+                                    this.report('the size value: ' + post + ' is incorrect!');
+                                }
+                            }
+                        },
+                        adm: {
+                            type: "string",
+                            eq: mockData[i].ad,
+                            error: "ad markup incorrect",
+                            minLength: 1
+                        },
+                        pass : {
+                            type: 'boolean',
+                            error: "bid should not be passed",
+                            eq: false
+                        }
+                    }
+                }, returnParcels[i]);
+
+                expect(result.valid, result.format(), result.message).to.be.true;
             }
         });
 
@@ -290,6 +352,41 @@ describe('parseResponse', function () {
                  */
 
                 expect(returnParcels[i]).to.exist;
+
+                var result = inspector.validate({
+                    type: 'object',
+                    properties: {
+                        targetingType: {
+                            type: 'string',
+                            eq: 'slot'
+                        },
+                        targeting: {
+                            type: 'object',
+                            properties: {
+                                [partnerModule.profile.targetingKeys.id]: {
+                                    type: 'array',
+                                    exactLength: 1,
+                                    items: {
+                                        type: 'string',
+                                        minLength: 1
+                                    }
+                                }
+                            }
+                        },
+                        price: {
+                            type: 'number',
+                            eq: 0,
+                            error: "bid price should be 0",
+                        },
+                        pass : {
+                            type: 'boolean',
+                            error: "bid should be passed",
+                            eq: true
+                        }
+                    }
+                }, returnParcels[i]);
+
+                expect(result.valid, result.format(), result.message).to.be.true;
             }
         });
 
@@ -365,14 +462,6 @@ describe('parseResponse', function () {
                                         minLength: 1
                                     }
                                 },
-                                [partnerModule.profile.targetingKeys.pmid]: {
-                                    type: 'array',
-                                    exactLength: 1,
-                                    items: {
-                                        type: 'string',
-                                        minLength: 1
-                                    }
-                                },
                                 pubKitAdId: {
                                     type: 'string',
                                     minLength: 1
@@ -414,6 +503,74 @@ describe('parseResponse', function () {
                  */
 
                 expect(returnParcels[i]).to.exist;
+
+                var result = inspector.validate({
+                    type: 'object',
+                    properties: {
+                        targetingType: {
+                            type: 'string',
+                            eq: 'slot'
+                        },
+                        targeting: {
+                            type: 'object',
+                            properties: {
+                                [partnerModule.profile.targetingKeys.id]: {
+                                    type: 'array',
+                                    exactLength: 1,
+                                    items: {
+                                        type: 'string',
+                                        minLength: 1
+                                    }
+                                },
+                                [partnerModule.profile.targetingKeys.om]: {
+                                    type: 'array',
+                                    exactLength: 1,
+                                    items: {
+                                        type: 'string',
+                                        minLength: 1
+                                    },
+                                    exec: function (shema, post) {
+                                        var expectedValue = mockData[i].width + "x" + mockData[i].height + "_" + mockData[i].cpm;
+                                        if (post[0] !== expectedValue) {
+                                            this.report('the targeting key om value: ' + post + ' is incorrect!');
+                                        }
+                                    }
+                                },
+                                pubKitAdId: {
+                                    type: 'string',
+                                    minLength: 1
+                                }
+                            }
+                        },
+                        price: {
+                            type: 'number',
+                            eq: mockData[i].cpm,
+                            error: "bid price incorrect",
+                        },
+                        size: {
+                            type: 'array',
+                            exec: function (shema, post) {
+                                var expectedValue = [mockData[i].width, mockData[i].height];
+                                if (post[0] !== expectedValue[0] || post[1] !== expectedValue[1]) {
+                                    this.report('the size value: ' + post + ' is incorrect!');
+                                }
+                            }
+                        },
+                        adm: {
+                            type: "string",
+                            eq: mockData[i].ad,
+                            error: "ad markup incorrect",
+                            minLength: 1
+                        },
+                        pass : {
+                            type: 'boolean',
+                            error: "bid should not be passed",
+                            eq: false
+                        }
+                    }
+                }, returnParcels[i]);
+
+                expect(result.valid, result.format(), result.message).to.be.true;
             }
         });
 
@@ -454,7 +611,7 @@ describe('parseResponse', function () {
 
             /* Get mock response data from our responseData file */
             responseData = JSON.parse(fs.readFileSync(path.join(__dirname, './support/mockResponseData.json')));
-            mockData = responseData.dealid;
+            mockData = responseData.deals;
         });
 
         afterEach(function () {

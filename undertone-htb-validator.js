@@ -42,10 +42,24 @@ var partnerValidator = function (configs) {
                 properties: {
                     '*': {
                         type: 'object',
-                        properties: {
-                            placementId: {
-                                type: 'string',
-                                minLength: 1
+                        placementId : {
+                            type: 'string',
+                            minLength: 1
+                        },
+                        publisherId : {
+                            type: 'integer',
+                            minLength: 1
+                        },
+                        sizes: {
+                            type: 'array',
+                            minLength : 1,
+                            items : {
+                                type: 'array',
+                                minLength: 2,
+                                items : {
+                                    type : 'integer',
+                                    minLength: 1
+                                }
                             }
                         }
                     }
