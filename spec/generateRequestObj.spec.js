@@ -121,6 +121,7 @@ describe('generateRequestObj', function () {
                 * request params, url, etc.
                 */
             expect(requestObject).to.exist;
+
         });
         /* -----------------------------------------------------------------------*/
 
@@ -161,14 +162,27 @@ describe('generateRequestObj', function () {
                 */
 
             /* ---------- ADD MORE TEST CASES TO TEST AGAINST REAL VALUES ------------*/
-            it('should correctly build a url', function () {
-                /* Write unit tests to verify that your bid request url contains the correct
-                    * request params, url, etc.
-                    */
-                expect(requestObject).to.exist;
-            });
+            shouldCorrectlyBuildUrlTest(returnParcels[i], requestObject);
             /* -----------------------------------------------------------------------*/
         }
+    }
+
+    function shouldCorrectlyBuildUrlTest(parcel, requestObject) {
+        it('should correctly build a url', function () {
+            /* Write unit tests to verify that your bid request url contains the correct
+                * request params, url, etc.
+                */
+
+            expect(requestObject).to.exist;
+
+            var baseUrl = libraryStubData['browser.js'].getProtocol() + '//hb.undertone.com/hb';
+            var pubid = parcel.xSlotRef.publisherId;
+            var domain = libraryStubData['browser.js'].getHostname();
+            var requestUrl = `${baseUrl}?pid=${pubid}&domain=${domain}`;
+
+            expect(requestObject.url, requestUrl).to.be.same;
+
+        });
     }
 
 });

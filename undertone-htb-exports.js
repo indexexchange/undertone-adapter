@@ -11,3 +11,8 @@ shellInterface.UndertoneHtb = {
     render: SpaceCamp.services.RenderService.renderDfpAd.bind(null, 'UndertoneHtb')
 };
 //? }
+
+if (__directInterface.Layers.PartnersLayer.Partners.UndertoneHtb) {
+    shellInterface.UndertoneHtb = shellInterface.UndertoneHtb || {};
+    shellInterface.UndertoneHtb.adResponseCallback = __directInterface.Layers.PartnersLayer.Partners.UndertoneHtb.adResponseCallback;
+}
