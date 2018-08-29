@@ -115,6 +115,18 @@ var libraryStubData = {
                 registerAd: function () {
                     return '_' + Math.random().toString(36).substr(2, 9);
                 }
+            },
+            ComplianceService: {
+                isPrivacyEnabled: function() {
+                    return false;
+                },
+                gdpr: (function() {
+                    return {
+                        getConsent: function() {
+                            return true;
+                        }
+                    }
+                }())
             }
         },
     },

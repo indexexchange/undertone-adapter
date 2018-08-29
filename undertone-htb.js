@@ -143,41 +143,46 @@ function UndertoneHtb(configs) {
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
         /* MRA partners receive only one parcel in the array. */
-        var returnParcel = returnParcels[0];
-        var xSlot = returnParcel.xSlotRef;
+        let bidsArray = [];
+        for (let i = 0; i < returnParcels.length; i++) {
+            var returnParcel = returnParcels[i];
+            var xSlot = returnParcel.xSlotRef;
 
-        var requestId = System.generateUniqueId();
-        var sizes = xSlot.sizes;
-        var pubId = xSlot.publisherId;
-        var placementId = xSlot.placementId;
-        var pageUrl = Browser.getPageUrl();
-        var hostname = Browser.getHostname();
-        let domain = /[-\w]+\.(?:[-\w]+\.xn--[-\w]+|[-\w]{3,}|[-\w]+\.[-\w]{2})$/i.exec(hostname);
-        if (domain == null || domain.length == 0) {
-            domain = null;
-        }
-        else {
-            domain = domain[0];
-        }
-
-        /* Change this to your bidder endpoint.*/
-        var baseUrl = Browser.getProtocol() + '//hb.undertone.com/hb';
-        var requestUrl = `${baseUrl}?pid=${pubId}&domain=${domain}`;
-
-
-        var queryObj = {
-            'x-ut-hb-params': [
-                {
-                    bidRequestId: requestId,
-                    hbadaptor: 'indexexchange',
-                    url: pageUrl,
-                    domain: domain,
-                    placementId: placementId,
-                    publisherId: pubId,
-                    sizes: sizes
+            var requestId = System.generateUniqueId();
+            var sizes = xSlot.sizes;
+            var pubId = xSlot.publisherId;
+            var placementId = xSlot.placementId;
+            var pageUrl = Browser.getPageUrl();
+            var hostname = Browser.getHostname();
+            let domains = /[-\w]+\.([-\w]+|[-\w]{3,}|[-\w]{1,3}\.[-\w]{2})$/i.exec(hostname);
+            let domain = null;
+            if (domains != null && domains.length > 0) {
+                domain = domains[0];
+                for (let i = 1; i < domains.length; i++) {
+                    if (domains[i].length > domain.length) {
+                        domain = domains[i];
+                    }
                 }
-            ]
+            }
+
+            /* Change this to your bidder endpoint.*/
+            var baseUrl = Browser.getProtocol() + '//hb.undertone.com/hb';
+            var requestUrl = `${baseUrl}?pid=${pubId}&domain=${domain}`;
+
+            bidsArray.push({
+                bidRequestId: requestId,
+                hbadaptor: 'indexexchange',
+                url: pageUrl,
+                domain: domain,
+                placementId: placementId,
+                publisherId: pubId,
+                sizes: sizes
+            });
+        }
+        var queryObj = {
+            'x-ut-hb-params': bidsArray
         };
+
 
         /* ------------------------ Get consent information -------------------------
          * If you want to implement GDPR consent in your adapter, use the function
@@ -203,8 +208,6 @@ function UndertoneHtb(configs) {
          * returned from gdpr.getConsent() are safe defaults and no attempt has been
          * made by the wrapper to contact a Consent Management Platform.
          */
-        var gdprStatus = ComplianceService.gdpr.getConsent();
-        var privacyEnabled = ComplianceService.isPrivacyEnabled();
 
         /* ---------------- Craft bid request using the above returnParcels --------- */
 
@@ -215,7 +218,11 @@ function UndertoneHtb(configs) {
         return {
             url: requestUrl,
             data: queryObj,
-            callbackId: requestId
+            callbackId: requestId,
+            networkParamOverrides: {
+                method: 'POST',
+                contentType: 'text/plain'
+            }
         };
     }
 
@@ -236,8 +243,10 @@ function UndertoneHtb(configs) {
             return;
         }
 
-        var callbackId = adResponse[0].bidRequestId;
-        __baseClass._adResponseStore[callbackId] = adResponse[0];
+        for (let i = 0; i < adResponse.length; i++) {
+            let currBidResponse = adResponse[i];
+            __baseClass._adResponseStore[currBidResponse.bidRequestId] = currBidResponse;
+        }
     }
     /* -------------------------------------------------------------------------- */
 
@@ -300,53 +309,70 @@ function UndertoneHtb(configs) {
 
         /* ---------- Process adResponse and extract the bids into the bids array ------------*/
 
-        /* MRA partners receive only one parcel in the array. */
-        var returnParcel = returnParcels[0];
-
-        /* header stats information */
-        var headerStatsInfo = {
-            sessionId: sessionId,
-            statsId: __profile.statsId,
-            htSlotId: returnParcel.htSlot.getId(),
-            xSlotNames: [returnParcel.xSlotName]
-        };
-
-        returnParcel.targetingType = 'slot';
-        returnParcel.targeting = {};
-        returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
-
-
-        if (adResponse == null || adResponse.ad == null || adResponse.cpm == 0) {
-            if (__profile.enabledAnalytics.requestTime) {
-                __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
+        let adResponseDic = {};
+        if (adResponse != null) {
+            for (let i=0; i<adResponse.length; i++) {
+                adResponseDic[adResponse[i].bidRequestId] = adResponse[i];
             }
-            returnParcel.price = 0;
-            returnParcel.pass = true;
-            return;
         }
 
-        returnParcel.adm = adResponse.ad;
-        returnParcel.price = adResponse.cpm;
-        returnParcel.size = [adResponse.width, adResponse.height];
+        /* MRA partners receive only one parcel in the array. */
+        for (let i = 0; i < returnParcels.length; i++) {
+            var returnParcel = returnParcels[i];
 
-        var sizeKey = Size.arrayToString(returnParcel.size);
-        returnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + returnParcel.price];
-        returnParcel.pass = false;
+            /* header stats information */
+            var headerStatsInfo = {
+                sessionId: sessionId,
+                statsId: __profile.statsId,
+                htSlotId: returnParcel.htSlot.getId(),
+                xSlotNames: [returnParcel.xSlotName]
+            };
 
-        var pubKitAdId = RenderService.registerAd({
-            sessionId: sessionId,
-            partnerId: __profile.partnerId,
-            adm: returnParcel.adm,
-            requestId: returnParcel.requestId,
-            size: returnParcel.size,
-            price: returnParcel.cpm,
-            timeOfExpiry: __profile.features.demandExpiry.enabled ? (__profile.features.demandExpiry.value + System.now()) : 0,
-            auxFn: __renderPixel,
-        });
+            returnParcel.targetingType = 'slot';
+            returnParcel.targeting = {};
+            returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
+            returnParcel.pass = false;
 
-        //? if (FEATURES.INTERNAL_RENDER) {
-        returnParcel.targeting.pubKitAdId = pubKitAdId;
+            let currAdResponse = adResponseDic[returnParcel.requestId];
+            if (currAdResponse == null) {
+                currAdResponse = {};
+            }
 
+            if (currAdResponse.ad == null || currAdResponse.cpm <= 0) {
+                if (__profile.enabledAnalytics.requestTime) {
+                    __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
+                }
+                returnParcel.pass = true;
+            }
+
+            returnParcel.adm = currAdResponse.ad || "";
+            returnParcel.price = currAdResponse.cpm || 0;
+
+            if (currAdResponse.width != null) {
+                returnParcel.size = [currAdResponse.width, currAdResponse.height];
+            } else {
+                returnParcel.size = [0,0];
+            }
+
+            var sizeKey = Size.arrayToString(returnParcel.size);
+            returnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + returnParcel.price];
+
+            if (!returnParcel.pass) {
+                var pubKitAdId = RenderService.registerAd({
+                    sessionId: sessionId,
+                    partnerId: __profile.partnerId,
+                    adm: returnParcel.adm,
+                    requestId: returnParcel.requestId,
+                    size: returnParcel.size,
+                    price: returnParcel.price,
+                    timeOfExpiry: __profile.features.demandExpiry.enabled ? (__profile.features.demandExpiry.value + System.now()) : 0,
+                    auxFn: __renderPixel,
+                });
+
+                //? if (FEATURES.INTERNAL_RENDER) {
+                returnParcel.targeting.pubKitAdId = pubKitAdId;
+            }
+        }
         /* --------------------------------------------------------------------------------- */
 
     }
@@ -356,6 +382,7 @@ function UndertoneHtb(configs) {
      * ---------------------------------- */
 
     (function __constructor() {
+        ComplianceService = SpaceCamp.services.ComplianceService;
         EventsService = SpaceCamp.services.EventsService;
         RenderService = SpaceCamp.services.RenderService;
 
@@ -395,8 +422,8 @@ function UndertoneHtb(configs) {
             bidUnitInCents: 1, // The bid price unit (in cents) the endpoint returns, please refer to the readme for details
             lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
             callbackType: Partner.CallbackTypes.ID, // Callback type, please refer to the readme for details
-            architecture: Partner.Architectures.MRA, // Request architecture, please refer to the readme for details
-            requestType: Partner.RequestTypes.ANY // Request type, jsonp, ajax, or any.
+            architecture: Partner.Architectures.SRA, // Request architecture, please refer to the readme for details
+            requestType: Partner.RequestTypes.AJAX // Request type, jsonp, ajax, or any.
         };
         /* ---------------------------------------------------------------------------------------*/
 

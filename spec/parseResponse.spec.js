@@ -36,7 +36,7 @@ function generateReturnParcels(profile, partnerConfig) {
                 getId: function () {
                     return this.id;
                 }
-            }
+            };
             for (var i = 0; i < xSlotsArray.length; i++) {
                 var xSlotName = xSlotsArray[i];
                 returnParcels.push({
@@ -44,7 +44,8 @@ function generateReturnParcels(profile, partnerConfig) {
                     htSlot: htSlot,
                     ref: "",
                     xSlotRef: partnerConfig.xSlots[xSlotName],
-                    requestId: '_' + Date.now()
+                    //requestId: '_' + Date.now()
+                    requestId: xSlotName
                 });
             }
         }
@@ -172,7 +173,7 @@ describe('parseResponse', function () {
                         },
                         adm: {
                             type: 'string',
-                            minLength: 1
+                            minLength: 0
                         }
                     }
                 }, returnParcels[i]);
@@ -265,7 +266,7 @@ describe('parseResponse', function () {
         });
 
         it('registerAd should be called with correct adEntry', function () {
-            var i, expectedAdEntry = [];
+            var expectedAdEntry = [];
 
             /* IF SRA, parse all parcels at once */
             if (partnerProfile.architecture === 1 || partnerProfile.architecture === 2) {
