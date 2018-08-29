@@ -143,8 +143,8 @@ function UndertoneHtb(configs) {
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
         /* MRA partners receive only one parcel in the array. */
-        let bidsArray = [];
-        for (let i = 0; i < returnParcels.length; i++) {
+        var bidsArray = [];
+        for (var i = 0; i < returnParcels.length; i++) {
             var returnParcel = returnParcels[i];
             var xSlot = returnParcel.xSlotRef;
 
@@ -154,11 +154,11 @@ function UndertoneHtb(configs) {
             var placementId = xSlot.placementId;
             var pageUrl = Browser.getPageUrl();
             var hostname = Browser.getHostname();
-            let domains = /[-\w]+\.([-\w]+|[-\w]{3,}|[-\w]{1,3}\.[-\w]{2})$/i.exec(hostname);
-            let domain = null;
+            var domains = /[-\w]+\.([-\w]+|[-\w]{3,}|[-\w]{1,3}\.[-\w]{2})$/i.exec(hostname);
+            var domain = null;
             if (domains != null && domains.length > 0) {
                 domain = domains[0];
-                for (let i = 1; i < domains.length; i++) {
+                for (var i = 1; i < domains.length; i++) {
                     if (domains[i].length > domain.length) {
                         domain = domains[i];
                     }
@@ -167,7 +167,7 @@ function UndertoneHtb(configs) {
 
             /* Change this to your bidder endpoint.*/
             var baseUrl = Browser.getProtocol() + '//hb.undertone.com/hb';
-            var requestUrl = `${baseUrl}?pid=${pubId}&domain=${domain}`;
+            var requestUrl = baseUrl + "?pid=" + pubId + "&domain=" + domain;
 
             bidsArray.push({
                 bidRequestId: requestId,
@@ -243,8 +243,8 @@ function UndertoneHtb(configs) {
             return;
         }
 
-        for (let i = 0; i < adResponse.length; i++) {
-            let currBidResponse = adResponse[i];
+        for (var i = 0; i < adResponse.length; i++) {
+            var currBidResponse = adResponse[i];
             __baseClass._adResponseStore[currBidResponse.bidRequestId] = currBidResponse;
         }
     }
@@ -309,15 +309,15 @@ function UndertoneHtb(configs) {
 
         /* ---------- Process adResponse and extract the bids into the bids array ------------*/
 
-        let adResponseDic = {};
+        var adResponseDic = {};
         if (adResponse != null) {
-            for (let i=0; i<adResponse.length; i++) {
+            for (var i=0; i<adResponse.length; i++) {
                 adResponseDic[adResponse[i].bidRequestId] = adResponse[i];
             }
         }
 
         /* MRA partners receive only one parcel in the array. */
-        for (let i = 0; i < returnParcels.length; i++) {
+        for (var i = 0; i < returnParcels.length; i++) {
             var returnParcel = returnParcels[i];
 
             /* header stats information */
@@ -333,7 +333,7 @@ function UndertoneHtb(configs) {
             returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
             returnParcel.pass = false;
 
-            let currAdResponse = adResponseDic[returnParcel.requestId];
+            var currAdResponse = adResponseDic[returnParcel.requestId];
             if (currAdResponse == null) {
                 currAdResponse = {};
             }
@@ -371,6 +371,7 @@ function UndertoneHtb(configs) {
 
                 //? if (FEATURES.INTERNAL_RENDER) {
                 returnParcel.targeting.pubKitAdId = pubKitAdId;
+                //? }
             }
         }
         /* --------------------------------------------------------------------------------- */
