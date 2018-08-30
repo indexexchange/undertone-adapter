@@ -175,7 +175,7 @@ function UndertoneHtb(configs) {
                 url: pageUrl,
                 domain: domain,
                 placementId: placementId,
-                publisherId: pubId,
+                publisherId: parseInt(pubId),
                 sizes: sizes
             });
         }

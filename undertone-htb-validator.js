@@ -47,7 +47,8 @@ var partnerValidator = function (configs) {
                             minLength: 1
                         },
                         publisherId : {
-                            type: 'integer'
+                            type: 'string',
+                            items: {pattern: /^[\d]+$/}
                         },
                         sizes: {
                             type: 'array',
