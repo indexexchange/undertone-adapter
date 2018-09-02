@@ -88,10 +88,10 @@ function UndertoneHtb(configs) {
          * STEP 2  | Generate Request URL
          * -----------------------------------------------------------------------------
          *
-         * Generate the URL to request demand from the partner endpoint using the provided
+         * Genferate the URL to request demand from the partner endpoint using the provided
          * returnParcels. The returnParcels is an array of objects each object containing
          * an .xSlotRef which is a reference to the xSlot object from the partner configuration.
-         * Use this to retrieve the placements/xSlots you need to request for.
+         * Use this to retrieve the placements/xSlots you need to request or.
          *
          * If your partner is MRA, returnParcels will be an array of length one. If your
          * partner is SRA, it will contain any number of entities. In any event, the full
@@ -182,7 +182,6 @@ function UndertoneHtb(configs) {
         var queryObj = {
             'x-ut-hb-params': bidsArray
         };
-
 
         /* ------------------------ Get consent information -------------------------
          * If you want to implement GDPR consent in your adapter, use the function

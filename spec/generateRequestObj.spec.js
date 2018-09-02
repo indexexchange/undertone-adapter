@@ -124,6 +124,7 @@ describe('generateRequestObj', function () {
                 * request params, url, etc.
                 */
             expect(requestObject).to.exist;
+
         });
         /* -----------------------------------------------------------------------*/
 
