@@ -11,8 +11,8 @@
     "eslint-config-adapters": "git+https://github.com/indexexchange/eslint-config-adapters.git"
   },
   "scripts": {
-    "debug": "node ./node_modules/adapter-test-suite/bin/index.js",
-    "win-debug": "node .\\node_modules\\adapter-test-suite\\bin\\index.js",
+    "debug": "node ./node_modules/adapter-development-suite/bin/index.js",
+    "win-debug": "node .\\node_modules\\adapter-development-suite\\bin\\index.js",
     "lint": "node ./node_modules/eslint/bin/eslint.js --ignore-path=./.eslintignore .",
     "win-lint": "node .\\node_modules\\eslint\\bin\\eslint.js --ignore-path=.\\.eslintignore ."
   }
