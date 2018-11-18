@@ -25,8 +25,7 @@ var SpaceCamp = require('space-camp.js');
 var System = require('system.js');
 var Network = require('network.js');
 var Utilities = require('utilities.js');
-var ComplianceService;
-var EventsService;
+
 var RenderService;
 
 //? if (DEBUG) {
@@ -83,7 +82,6 @@ function UndertoneHtb(configs) {
      * @return {object}
      */
     function __generateRequestObj(returnParcels) {
-
         /* =============================================================================
          * STEP 2  | Generate Request URL
          * -----------------------------------------------------------------------------
@@ -143,39 +141,40 @@ function UndertoneHtb(configs) {
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
         /* MRA partners receive only one parcel in the array. */
+        var requestUrl = null;
         var bidsArray = [];
-        for (var i = 0; i < returnParcels.length; i++) {
-            var returnParcel = returnParcels[i];
+        var pubId = returnParcels.publisherId;
+        for (var index = 0; index < returnParcels.length; index++) {
+            var returnParcel = returnParcels[index];
             var xSlot = returnParcel.xSlotRef;
 
-            var requestId = System.generateUniqueId();
+            var currBidId = System.generateUniqueId();
             var sizes = xSlot.sizes;
-            var pubId = xSlot.publisherId;
+
             var placementId = xSlot.placementId;
             var pageUrl = Browser.getPageUrl();
             var hostname = Browser.getHostname();
-            var domains = /[-\w]+\.([-\w]+|[-\w]{3,}|[-\w]{1,3}\.[-\w]{2})$/i.exec(hostname);
+            var domains = (/[-\w]+\.([-\w]+|[-\w]{3,}|[-\w]{1,3}\.[-\w]{2})$/i).exec(hostname);
             var domain = null;
-            if (domains != null && domains.length > 0) {
+            if (domains !== null && domains.length > 0) {
                 domain = domains[0];
-                for (var i = 1; i < domains.length; i++) {
-                    if (domains[i].length > domain.length) {
-                        domain = domains[i];
+                for (var domainsIdx = 1; domainsIdx < domains.length; domainsIdx++) {
+                    if (domains[domainsIdx].length > domain.length) {
+                        domain = domains[domainsIdx];
                     }
                 }
             }
 
-            /* Change this to your bidder endpoint.*/
             var baseUrl = Browser.getProtocol() + '//hb.undertone.com/hb';
-            var requestUrl = baseUrl + "?pid=" + pubId + "&domain=" + domain;
+            requestUrl = baseUrl + '?pid=' + pubId + '&domain=' + domain;
 
             bidsArray.push({
-                bidRequestId: requestId,
+                bidRequestId: currBidId,
                 hbadaptor: 'indexexchange',
                 url: pageUrl,
                 domain: domain,
                 placementId: placementId,
-                publisherId: parseInt(pubId),
+                publisherId: parseInt(pubId, 10),
                 sizes: sizes
             });
         }
@@ -217,7 +216,7 @@ function UndertoneHtb(configs) {
         return {
             url: requestUrl,
             data: queryObj,
-            callbackId: requestId,
+            callbackId: System.generateUniqueId(),
             networkParamOverrides: {
                 method: 'POST',
                 contentType: 'text/plain'
@@ -237,8 +236,8 @@ function UndertoneHtb(configs) {
      * callback type to CallbackTypes.CALLBACK_NAME and omit this function.
      */
     function adResponseCallback(adResponse) {
-        /* get callbackId from adResponse here */
-        if (adResponse == null || !Utilities.isArray(adResponse) || adResponse.length == 0) {
+        /* Get callbackId from adResponse here */
+        if (adResponse === null || !Utilities.isArray(adResponse) || adResponse.length === 0) {
             return;
         }
 
@@ -247,6 +246,7 @@ function UndertoneHtb(configs) {
             __baseClass._adResponseStore[currBidResponse.bidRequestId] = currBidResponse;
         }
     }
+
     /* -------------------------------------------------------------------------- */
 
     /* Helpers
@@ -258,15 +258,15 @@ function UndertoneHtb(configs) {
      *
     */
 
-     /**
+    /**
      * This function will render the pixel given.
      * @param  {string} pixelUrl Tracking pixel img url.
      */
     function __renderPixel(pixelUrl) {
-        if (pixelUrl){
+        if (pixelUrl) {
             Network.img({
                 url: decodeURIComponent(pixelUrl),
-                method: 'GET',
+                method: 'GET'
             });
         }
     }
@@ -285,8 +285,6 @@ function UndertoneHtb(configs) {
      * attached to each one of the objects for which the demand was originally requested for.
      */
     function __parseResponse(sessionId, adResponse, returnParcels) {
-
-
         /* =============================================================================
          * STEP 4  | Parse & store demand response
          * -----------------------------------------------------------------------------
@@ -306,20 +304,18 @@ function UndertoneHtb(configs) {
          *
          */
 
-        /* ---------- Process adResponse and extract the bids into the bids array ------------*/
-
         var adResponseDic = {};
-        if (adResponse != null) {
-            for (var i=0; i<adResponse.length; i++) {
-                adResponseDic[adResponse[i].bidRequestId] = adResponse[i];
+        if (adResponse !== null) {
+            for (var idx = 0; idx < adResponse.length; idx++) {
+                adResponseDic[adResponse[idx].bidRequestId] = adResponse[idx];
             }
         }
 
         /* MRA partners receive only one parcel in the array. */
-        for (var i = 0; i < returnParcels.length; i++) {
-            var returnParcel = returnParcels[i];
+        for (var parcelIdx = 0; parcelIdx < returnParcels.length; parcelIdx++) {
+            var returnParcel = returnParcels[parcelIdx];
 
-            /* header stats information */
+            /* Header stats information */
             var headerStatsInfo = {
                 sessionId: sessionId,
                 statsId: __profile.statsId,
@@ -333,30 +329,42 @@ function UndertoneHtb(configs) {
             returnParcel.pass = false;
 
             var currAdResponse = adResponseDic[returnParcel.requestId];
-            if (currAdResponse == null) {
+            if (currAdResponse === null) {
                 currAdResponse = {};
             }
 
-            if (currAdResponse.ad == null || currAdResponse.cpm <= 0) {
+            if (currAdResponse.ad === null || currAdResponse.cpm <= 0) {
                 if (__profile.enabledAnalytics.requestTime) {
                     __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
                 }
                 returnParcel.pass = true;
             }
 
-            returnParcel.adm = currAdResponse.ad || "";
+            returnParcel.adm = currAdResponse.ad || '';
             returnParcel.price = currAdResponse.cpm || 0;
 
-            if (currAdResponse.width != null) {
+            if (currAdResponse.width !== null) {
                 returnParcel.size = [currAdResponse.width, currAdResponse.height];
             } else {
-                returnParcel.size = [0,0];
+                returnParcel.size = [0, 0];
             }
 
             var sizeKey = Size.arrayToString(returnParcel.size);
             returnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + returnParcel.price];
 
-            if (!returnParcel.pass) {
+            var expirationTime = 0;
+            if (__profile.features.demandExpiry.enabled) {
+                expirationTime = __profile.features.demandExpiry.value + System.now();
+            }
+
+            if (returnParcel.pass) {
+                //? if (DEBUG) {
+                Scribe.info(__profile.partnerId + ' returned pass for { id: ' + adResponse.id + ' }.');
+                //? }
+                if (__profile.enabledAnalytics.requestTime) {
+                    __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
+                }
+            } else {
                 var pubKitAdId = RenderService.registerAd({
                     sessionId: sessionId,
                     partnerId: __profile.partnerId,
@@ -364,8 +372,8 @@ function UndertoneHtb(configs) {
                     requestId: returnParcel.requestId,
                     size: returnParcel.size,
                     price: returnParcel.price,
-                    timeOfExpiry: __profile.features.demandExpiry.enabled ? (__profile.features.demandExpiry.value + System.now()) : 0,
-                    auxFn: __renderPixel,
+                    timeOfExpiry: expirationTime,
+                    auxFn: __renderPixel
                 });
 
                 //? if (FEATURES.INTERNAL_RENDER) {
@@ -373,8 +381,6 @@ function UndertoneHtb(configs) {
                 //? }
             }
         }
-        /* --------------------------------------------------------------------------------- */
-
     }
 
     /* =====================================
@@ -382,8 +388,6 @@ function UndertoneHtb(configs) {
      * ---------------------------------- */
 
     (function __constructor() {
-        ComplianceService = SpaceCamp.services.ComplianceService;
-        EventsService = SpaceCamp.services.EventsService;
         RenderService = SpaceCamp.services.RenderService;
 
         /* =============================================================================
@@ -393,11 +397,10 @@ function UndertoneHtb(configs) {
          * Please fill out the below partner profile according to the steps in the README doc.
          */
 
-        /* ---------- Please fill out this partner profile according to your module ------------*/
         __profile = {
-            partnerId: 'UndertoneHtb', // PartnerName
-            namespace: 'UndertoneHtb', // Should be same as partnerName
-            statsId: 'UNDR', // Unique partner identifier
+            partnerId: 'UndertoneHtb',
+            namespace: 'UndertoneHtb',
+            statsId: 'UNDR',
             version: '2.1.0',
             targetingType: 'slot',
             enabledAnalytics: {
@@ -413,19 +416,20 @@ function UndertoneHtb(configs) {
                     value: 0
                 }
             },
-            targetingKeys: { // Targeting keys for demand, should follow format ix_{statsId}_id
+            targetingKeys: {
                 id: 'ix_undr_id',
                 om: 'ix_undr_cpm',
                 pm: 'ix_undr_cpm',
                 pmid: 'ix_undr_dealid'
             },
-            bidUnitInCents: 1, // The bid price unit (in cents) the endpoint returns, please refer to the readme for details
+            bidUnitInCents: 100,
             lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
-            callbackType: Partner.CallbackTypes.ID, // Callback type, please refer to the readme for details
-            architecture: Partner.Architectures.SRA, // Request architecture, please refer to the readme for details
-            requestType: Partner.RequestTypes.AJAX // Request type, jsonp, ajax, or any.
+            callbackType: Partner.CallbackTypes.NONE,
+            architecture: Partner.Architectures.SRA,
+            requestType: Partner.RequestTypes.AJAX
         };
-        /* ---------------------------------------------------------------------------------------*/
+
+        /* --------------------------------------------------------------------------------------- */
 
         //? if (DEBUG) {
         var results = ConfigValidators.partnerBaseConfig(configs) || PartnerSpecificValidator(configs);
@@ -471,7 +475,7 @@ function UndertoneHtb(configs) {
         //? if (TEST) {
         parseResponse: __parseResponse,
         generateRequestObj: __generateRequestObj,
-        adResponseCallback: adResponseCallback,
+        adResponseCallback: adResponseCallback
         //? }
     };
 
