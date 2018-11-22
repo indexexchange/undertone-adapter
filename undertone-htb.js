@@ -72,6 +72,11 @@ function UndertoneHtb(configs) {
 
     /* Utilities
      * ---------------------------------- */
+    var publisherId = configs.publisherId;
+
+    function getPublisherId() {
+        return publisherId;
+    }
 
     /**
      * Generates the request URL and query data to the endpoint for the xSlots
@@ -143,13 +148,14 @@ function UndertoneHtb(configs) {
         /* MRA partners receive only one parcel in the array. */
         var requestUrl = null;
         var bidsArray = [];
-        var pubId = returnParcels.publisherId;
+        var pubId = getPublisherId();
         for (var index = 0; index < returnParcels.length; index++) {
             var returnParcel = returnParcels[index];
             var xSlot = returnParcel.xSlotRef;
 
             var currBidId = System.generateUniqueId();
             var sizes = xSlot.sizes;
+            xSlot.bidId = currBidId;
 
             var placementId = xSlot.placementId;
             var pageUrl = Browser.getPageUrl();
@@ -328,7 +334,7 @@ function UndertoneHtb(configs) {
             returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
             returnParcel.pass = false;
 
-            var currAdResponse = adResponseDic[returnParcel.requestId];
+            var currAdResponse = adResponseDic[returnParcel.xSlotRef.bidId];
             if (currAdResponse === null) {
                 currAdResponse = {};
             }
@@ -344,7 +350,7 @@ function UndertoneHtb(configs) {
             returnParcel.price = currAdResponse.cpm || 0;
 
             if (currAdResponse.width !== null) {
-                returnParcel.size = [currAdResponse.width, currAdResponse.height];
+                returnParcel.size = [Number(currAdResponse.width), Number(currAdResponse.height)];
             } else {
                 returnParcel.size = [0, 0];
             }
