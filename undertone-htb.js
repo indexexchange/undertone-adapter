@@ -331,7 +331,6 @@ function UndertoneHtb(configs) {
 
             returnParcel.targetingType = 'slot';
             returnParcel.targeting = {};
-            returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
             returnParcel.pass = false;
 
             var currAdResponse = adResponseDic[returnParcel.xSlotRef.bidId];
@@ -344,6 +343,8 @@ function UndertoneHtb(configs) {
                     __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
                 }
                 returnParcel.pass = true;
+            } else {
+                returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
             }
 
             returnParcel.adm = currAdResponse.ad || '';
