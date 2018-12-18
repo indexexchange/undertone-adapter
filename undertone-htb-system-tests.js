@@ -20,10 +20,12 @@ function getConfig() {
         publisherId: "12345",
         xSlots: {
             1: {
-                sizes: [[300, 250]]
+                sizes: [[300, 250]],
+                placementId: "1234"
             },
             2: {
-                sizes: [[300, 600]]
+                sizes: [[300, 600]],
+                placementId: "1234"
             }
         }
     };
@@ -37,17 +39,21 @@ function getBidRequestRegex() {
 }
 
 function validateBidRequest(request) {
+
     expect(request.query.pid).toBe("12345");
     expect(request.query.domain).toBeDefined();
 }
 
 function getValidResponse(request, creative) {
 
+    //debugger;
+    console.log("bidreqid: " + JSON.stringify(JSON.parse(request.body)["x-ut-hb-params"][0]["bidRequestId"]));
+    //console.log("req body: " + JSON.stringify(request));
     var response = JSON.stringify([
         {
             ad: creative,
             publisherId: 12345,
-            //bidRequestId
+            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][0]["bidRequestId"],
             //placementId
             adId: 15,
             campaignId: 2,
@@ -55,26 +61,27 @@ function getValidResponse(request, creative) {
             width: 300,
             ttl: 720,
             currency: 'USD',
-            cpm: 5,
+            cpm: 2,
             adaptor: 'indexexchange',
             netRevenue: true
         },
         {
             ad: creative,
             publisherId: 12345,
+            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][1]["bidRequestId"],
             adId: 15,
             campaignId: 2,
             height: 600,
             width: 300,
             ttl: 720,
             currency: 'USD',
-            cpm: 5,
+            cpm: 2,
             adaptor: 'indexexchange',
             netRevenue: true
         }
     ]);
 
-    return 'headertag.IndexExchangeHtb.adResponseCallback(' + JSON.stringify(response) + ')';
+    return response;
 
     // var response = JSON.stringify([
     //     {
@@ -99,15 +106,52 @@ function getValidResponse(request, creative) {
 }
 
 function validateTargeting(targetingMap) {
-    expect(targetingMap).toEqual(jasmine.object());
+    //expect(targetingMap).toEqual(jasmine.object());
     // expect(targetingMap).toEqual(jasmine.objectContaining({
     //     //ix_undr_cpm: jasmine.arrayContaining(['300x250_5']),
     //     ix_undr_id: jasmine.arrayContaining([jasmine.any(String)])
     // }));
+
+    console.log(targetingMap);
+    expect(targetingMap).toEqual(jasmine.objectContaining({
+        ix_undr_cpm: jasmine.arrayContaining(['300x250_200']),
+    }));
 }
 
 function getPassResponse() {
-    return "";
+    var response = JSON.stringify([
+        {
+            ad: creative,
+            publisherId: 12345,
+            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][0]["bidRequestId"],
+            //placementId
+            adId: 15,
+            campaignId: 2,
+            height: 250,
+            width: 300,
+            ttl: 720,
+            currency: 'USD',
+            cpm: 0,
+            adaptor: 'indexexchange',
+            netRevenue: true
+        },
+        {
+            ad: creative,
+            publisherId: 12345,
+            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][1]["bidRequestId"],
+            adId: 15,
+            campaignId: 2,
+            height: 600,
+            width: 300,
+            ttl: 720,
+            currency: 'USD',
+            cpm: 0,
+            adaptor: 'indexexchange',
+            netRevenue: true
+        }
+    ]);
+
+    return response;
 }
 
 module.exports = {

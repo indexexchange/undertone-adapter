@@ -348,7 +348,8 @@ function UndertoneHtb(configs) {
             }
 
             returnParcel.adm = currAdResponse.ad || '';
-            returnParcel.price = currAdResponse.cpm || 0;
+            var bidPrice = currAdResponse.cpm || 0;
+            var bidDealId = '';
 
             if (currAdResponse.width !== null) {
                 returnParcel.size = [Number(currAdResponse.width), Number(currAdResponse.height)];
@@ -356,8 +357,34 @@ function UndertoneHtb(configs) {
                 returnParcel.size = [0, 0];
             }
 
+            if (__profile.enabledAnalytics.requestTime) {
+                __baseClass._emitStatsEvent(sessionId, 'hs_slot_bid', headerStatsInfo);
+            }
+
+            var targetingCpm = '';
+            //? if (FEATURES.GPT_LINE_ITEMS) {
+            targetingCpm = __baseClass._bidTransformers.targeting.apply(bidPrice);
             var sizeKey = Size.arrayToString(returnParcel.size);
-            returnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + returnParcel.price];
+
+            if (bidDealId) {
+                returnParcel.targeting[__baseClass._configs.targetingKeys.pmid] = [sizeKey + '_' + bidDealId];
+                returnParcel.targeting[__baseClass._configs.targetingKeys.pm] = [sizeKey + '_' + targetingCpm];
+            } else {
+                returnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + targetingCpm];
+            }
+            //returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
+            //? }
+
+            //? if (FEATURES.RETURN_CREATIVE) {
+            returnParcel.adm = bidCreative;
+            if (pixelUrl) {
+                returnParcel.winNotice = __renderPixel.bind(null, pixelUrl);
+            }
+            //? }
+
+            //? if (FEATURES.RETURN_PRICE) {
+            returnParcel.price = Number(__baseClass._bidTransformers.price.apply(bidPrice));
+            //? }
 
             var expirationTime = 0;
             if (__profile.features.demandExpiry.enabled) {
@@ -378,9 +405,9 @@ function UndertoneHtb(configs) {
                     adm: returnParcel.adm,
                     requestId: returnParcel.requestId,
                     size: returnParcel.size,
-                    price: returnParcel.price,
+                    price: targetingCpm,
                     timeOfExpiry: expirationTime,
-                    auxFn: __renderPixel
+                    //auxFn: __renderPixel
                 });
 
                 //? if (FEATURES.INTERNAL_RENDER) {
