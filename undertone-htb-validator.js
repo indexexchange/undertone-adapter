@@ -46,7 +46,8 @@ function partnerValidator(configs) {
                         type: 'object',
                         placementId: {
                             type: 'string',
-                            minLength: 1
+                            minLength: 1,
+                            optional: true
                         },
                         sizes: {
                             type: 'array',

@@ -46,15 +46,11 @@ function validateBidRequest(request) {
 
 function getValidResponse(request, creative) {
 
-    //debugger;
-    console.log("bidreqid: " + JSON.stringify(JSON.parse(request.body)["x-ut-hb-params"][0]["bidRequestId"]));
-    //console.log("req body: " + JSON.stringify(request));
     var response = JSON.stringify([
         {
             ad: creative,
             publisherId: 12345,
             bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][0]["bidRequestId"],
-            //placementId
             adId: 15,
             campaignId: 2,
             height: 250,
@@ -82,37 +78,9 @@ function getValidResponse(request, creative) {
     ]);
 
     return response;
-
-    // var response = JSON.stringify([
-    //     {
-    //         ad: creative,
-    //         publisherId: request.query.publisherId,
-    //         bidRequestId: request.body["x-ut-hb-params"][0].bidRequestId,
-    //         placementId: request.body["x-ut-hb-params"][0].placementId,
-    //         height: request.body["x-ut-hb-params"][0].sizes[0][0],
-    //         width: request.body["x-ut-hb-params"][0].sizes[0][1],
-    //         cpm: 5,
-    //     },
-    //     {
-    //         ad: creative,
-    //         publisherId: request.query.publisherId,
-    //         bidRequestId: request.body["x-ut-hb-params"][1].bidRequestId,
-    //         placementId: request.body["x-ut-hb-params"][1].placementId,
-    //         height: request.body["x-ut-hb-params"][1].sizes[0][0],
-    //         width: request.body["x-ut-hb-params"][1].sizes[0][1],
-    //         cpm: 5,
-    //     }
-    // ]);
 }
 
 function validateTargeting(targetingMap) {
-    //expect(targetingMap).toEqual(jasmine.object());
-    // expect(targetingMap).toEqual(jasmine.objectContaining({
-    //     //ix_undr_cpm: jasmine.arrayContaining(['300x250_5']),
-    //     ix_undr_id: jasmine.arrayContaining([jasmine.any(String)])
-    // }));
-
-    console.log(targetingMap);
     expect(targetingMap).toEqual(jasmine.objectContaining({
         ix_undr_cpm: jasmine.arrayContaining(['300x250_200']),
     }));
