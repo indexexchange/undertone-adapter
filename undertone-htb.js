@@ -343,13 +343,12 @@ function UndertoneHtb(configs) {
                 returnParcel.pass = true;
 
                 continue;
-            } else {
-                returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
             }
 
-            returnParcel.adm = currAdResponse.ad || '';
+            var bidCreative = currAdResponse.ad || '';
             var bidPrice = currAdResponse.cpm || 0;
             var bidDealId = '';
+            var pixelUrl = '';
 
             if (currAdResponse.width !== null) {
                 returnParcel.size = [Number(currAdResponse.width), Number(currAdResponse.height)];
@@ -402,7 +401,7 @@ function UndertoneHtb(configs) {
                 var pubKitAdId = RenderService.registerAd({
                     sessionId: sessionId,
                     partnerId: __profile.partnerId,
-                    adm: returnParcel.adm,
+                    adm: bidCreative,
                     requestId: returnParcel.requestId,
                     size: returnParcel.size,
                     price: targetingCpm,
