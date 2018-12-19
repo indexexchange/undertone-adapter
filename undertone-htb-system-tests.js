@@ -1,3 +1,5 @@
+'use strict';
+
 function getPartnerId() {
     return 'UndertoneHtb';
 }
@@ -14,18 +16,16 @@ function getArchitecture() {
     return 'SRA';
 }
 
-
 function getConfig() {
     return {
-        publisherId: "12345",
+        publisherId: '12345',
         xSlots: {
             1: {
                 sizes: [[300, 250]],
-                placementId: "1234"
+                placementId: '1234'
             },
             2: {
-                sizes: [[300, 600]],
-                placementId: "1234"
+                sizes: [[300, 600]]
             }
         }
     };
@@ -39,18 +39,16 @@ function getBidRequestRegex() {
 }
 
 function validateBidRequest(request) {
-
-    expect(request.query.pid).toBe("12345");
+    expect(request.query.pid).toBe('12345');
     expect(request.query.domain).toBeDefined();
 }
 
 function getValidResponse(request, creative) {
-
     var response = JSON.stringify([
         {
             ad: creative,
             publisherId: 12345,
-            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][0]["bidRequestId"],
+            bidRequestId: JSON.parse(request.body)['x-ut-hb-params'][0].bidRequestId,
             adId: 15,
             campaignId: 2,
             height: 250,
@@ -64,7 +62,7 @@ function getValidResponse(request, creative) {
         {
             ad: creative,
             publisherId: 12345,
-            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][1]["bidRequestId"],
+            bidRequestId: JSON.parse(request.body)['x-ut-hb-params'][1].bidRequestId,
             adId: 15,
             campaignId: 2,
             height: 600,
@@ -82,17 +80,16 @@ function getValidResponse(request, creative) {
 
 function validateTargeting(targetingMap) {
     expect(targetingMap).toEqual(jasmine.objectContaining({
-        ix_undr_cpm: jasmine.arrayContaining(['300x250_200']),
+        ix_undr_cpm: jasmine.arrayContaining(['300x250_200'])
     }));
 }
 
-function getPassResponse() {
+function getPassResponse(request) {
     var response = JSON.stringify([
         {
-            ad: creative,
+            ad: null,
             publisherId: 12345,
-            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][0]["bidRequestId"],
-            //placementId
+            bidRequestId: JSON.parse(request.body)['x-ut-hb-params'][0].bidRequestId,
             adId: 15,
             campaignId: 2,
             height: 250,
@@ -104,9 +101,9 @@ function getPassResponse() {
             netRevenue: true
         },
         {
-            ad: creative,
+            ad: null,
             publisherId: 12345,
-            bidRequestId: JSON.parse(request.body)["x-ut-hb-params"][1]["bidRequestId"],
+            bidRequestId: JSON.parse(request.body)['x-ut-hb-params'][1].bidRequestId,
             adId: 15,
             campaignId: 2,
             height: 600,
@@ -127,13 +124,10 @@ module.exports = {
     getStatsId: getStatsId,
     getCallbackType: getCallbackType,
     getArchitecture: getArchitecture,
-    //getRequestsToBlock: getRequestsToBlock,
     getConfig: getConfig,
     getBidRequestRegex: getBidRequestRegex,
     validateBidRequest: validateBidRequest,
     getValidResponse: getValidResponse,
     validateTargeting: validateTargeting,
     getPassResponse: getPassResponse
-    //getValidBidResponseWithDeal: getValidBidResponseWithDeal,
-    //validateTargetingWithDeal: validateTargetingWithDeal
 };

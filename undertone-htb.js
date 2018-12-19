@@ -322,12 +322,10 @@ function UndertoneHtb(configs) {
             var returnParcel = returnParcels[parcelIdx];
 
             /* Header stats information */
-            var headerStatsInfo = {
-                sessionId: sessionId,
-                statsId: __profile.statsId,
-                htSlotId: returnParcel.htSlot.getId(),
-                xSlotNames: [returnParcel.xSlotName]
-            };
+            var headerStatsInfo = {};
+            var htSlotId = returnParcel.htSlot.getId();
+            headerStatsInfo[htSlotId] = {};
+            headerStatsInfo[htSlotId][returnParcel.requestId] = [returnParcel.xSlotName];
 
             returnParcel.targetingType = 'slot';
             returnParcel.targeting = {};
@@ -343,6 +341,8 @@ function UndertoneHtb(configs) {
                     __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
                 }
                 returnParcel.pass = true;
+
+                continue;
             } else {
                 returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
             }
@@ -357,10 +357,6 @@ function UndertoneHtb(configs) {
                 returnParcel.size = [0, 0];
             }
 
-            if (__profile.enabledAnalytics.requestTime) {
-                __baseClass._emitStatsEvent(sessionId, 'hs_slot_bid', headerStatsInfo);
-            }
-
             var targetingCpm = '';
             //? if (FEATURES.GPT_LINE_ITEMS) {
             targetingCpm = __baseClass._bidTransformers.targeting.apply(bidPrice);
@@ -372,7 +368,7 @@ function UndertoneHtb(configs) {
             } else {
                 returnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + targetingCpm];
             }
-            //returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
+            returnParcel.targeting[__baseClass._configs.targetingKeys.id] = [returnParcel.requestId];
             //? }
 
             //? if (FEATURES.RETURN_CREATIVE) {
@@ -399,6 +395,10 @@ function UndertoneHtb(configs) {
                     __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
                 }
             } else {
+                if (__profile.enabledAnalytics.requestTime) {
+                    __baseClass._emitStatsEvent(sessionId, 'hs_slot_bid', headerStatsInfo);
+                }
+
                 var pubKitAdId = RenderService.registerAd({
                     sessionId: sessionId,
                     partnerId: __profile.partnerId,
@@ -406,8 +406,7 @@ function UndertoneHtb(configs) {
                     requestId: returnParcel.requestId,
                     size: returnParcel.size,
                     price: targetingCpm,
-                    timeOfExpiry: expirationTime,
-                    //auxFn: __renderPixel
+                    timeOfExpiry: expirationTime
                 });
 
                 //? if (FEATURES.INTERNAL_RENDER) {
