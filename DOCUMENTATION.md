@@ -3,7 +3,7 @@
 |Feature|  |
 |---|---|
 | Consent |  |
-| Native Ad Support | Y |
+| Native Ad Support | N |
 | SafeFrame Support | Y |
 | PMP Support | N |
  
@@ -117,7 +117,9 @@ or Returns HTTP status code - 204 No Content
 ```javascript
  {
   "publisherId": "12345",
-  "placementId": "471141",
-  "sizes": [[300, 250]]
+  {
+    "placementId": "471141",
+    "sizes": [[300, 250]]
+  }
 } 
 ```
