@@ -13,22 +13,22 @@
 | Chrome | Y |
 | Edge | Y |
 | Firefox | Y |
-| Internet Explorer 9 |  |
-| Internet Explorer 10 |  |
-| Internet Explorer 11 |  |
-| Safari |  |
-| Mobile Chrome | |
-| Mobile Safari | |
-| UC Browser | |
-| Samsung Internet | |
-| Opera | |
+| Internet Explorer 9 | N |
+| Internet Explorer 10 | N |
+| Internet Explorer 11 | Y |
+| Safari | Y |
+| Mobile Chrome | Y |
+| Mobile Safari | Y |
+| UC Browser | N |
+| Samsung Internet | Y |
+| Opera | N |
  
 ## Adapter Information
 | Info | |
 |---|---|
 | Partner Id | UndertoneHtb |
 | Ad Server Responds in (Cents, Dollars, etc) | Cents |
-| Bid Type (Gross / Net) | |
+| Bid Type (Gross / Net) | Net |
 | GAM Key (Open Market) | |
 | GAM Key (Private Market) | |
 | Ad Server URLs | //hb.undertone.com/hb |
