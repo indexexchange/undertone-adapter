@@ -29,8 +29,8 @@
 | Partner Id | UndertoneHtb |
 | Ad Server Responds in (Cents, Dollars, etc) | Cents |
 | Bid Type (Gross / Net) | Net |
-| GAM Key (Open Market) | |
-| GAM Key (Private Market) | |
+| GAM Key (Open Market) | ix_undr_cpm |
+| GAM Key (Private Market) | ix_undr_cpm |
 | Ad Server URLs | //hb.undertone.com/hb |
 | Slot Mapping Sytle (Size / Multiple Sizes / Slot) | Multiple Sizes |
 | Request Architecture (MRA / SRA) | SRA |
