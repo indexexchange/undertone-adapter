@@ -46,7 +46,7 @@ function validateBidRequest(request) {
 function getValidResponse(request, creative) {
     var response = JSON.stringify([
         {
-            ad: creative,
+            ad: creative || '<div id="1"></div>',
             publisherId: 12345,
             bidRequestId: JSON.parse(request.body)['x-ut-hb-params'][0].bidRequestId,
             adId: 15,
@@ -60,7 +60,7 @@ function getValidResponse(request, creative) {
             netRevenue: true
         },
         {
-            ad: creative,
+            ad: creative || '<div id="1"></div>',
             publisherId: 12345,
             bidRequestId: JSON.parse(request.body)['x-ut-hb-params'][1].bidRequestId,
             adId: 15,

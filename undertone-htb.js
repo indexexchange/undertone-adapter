@@ -288,6 +288,7 @@ function UndertoneHtb(configs) {
      *
      * @param {object[]} returnParcels The array of original parcels, SAME array that was passed to
      * generateRequestObj to signal which slots need demand. In this funciton, the demand needs to be
+     * generateRequestObj to signal which slots need demand. In this funciton, the demand needs to be
      * attached to each one of the objects for which the demand was originally requested for.
      */
     function __parseResponse(sessionId, adResponse, returnParcels) {
@@ -311,7 +312,7 @@ function UndertoneHtb(configs) {
          */
 
         var adResponseDic = {};
-        if (adResponse !== null) {
+        if (typeof adResponse !== 'undefined') {
             for (var idx = 0; idx < adResponse.length; idx++) {
                 adResponseDic[adResponse[idx].bidRequestId] = adResponse[idx];
             }
@@ -332,11 +333,11 @@ function UndertoneHtb(configs) {
             returnParcel.pass = false;
 
             var currAdResponse = adResponseDic[returnParcel.xSlotRef.bidId];
-            if (currAdResponse === null) {
+            if (typeof currAdResponse === 'undefined') {
                 currAdResponse = {};
             }
 
-            if (currAdResponse.ad === null || currAdResponse.cpm <= 0) {
+            if (typeof currAdResponse.ad === 'undefined' || currAdResponse.cpm <= 0) {
                 if (__profile.enabledAnalytics.requestTime) {
                     __baseClass._emitStatsEvent(sessionId, 'hs_slot_pass', headerStatsInfo);
                 }
@@ -350,7 +351,7 @@ function UndertoneHtb(configs) {
             var bidDealId = '';
             var pixelUrl = '';
 
-            if (currAdResponse.width !== null) {
+            if (typeof currAdResponse.width !== 'undefined') {
                 returnParcel.size = [Number(currAdResponse.width), Number(currAdResponse.height)];
             } else {
                 returnParcel.size = [0, 0];
