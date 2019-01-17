@@ -10,7 +10,6 @@
  * prior written permission of Index Exchange.
  */
 
-
 'use strict';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +22,6 @@ var Inspector = require('../../../libs/external/schema-inspector.js');
 // Main ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-
 /* =============================================================================
  * STEP 0 | Config Validation
  * -----------------------------------------------------------------------------
@@ -33,31 +31,32 @@ var Inspector = require('../../../libs/external/schema-inspector.js');
  * schema-insepctor to perform the validation. Information about it can be found here:
  * https://atinux.fr/schema-inspector/.
  */
-var partnerValidator = function (configs) {
+function partnerValidator(configs) {
     var result = Inspector.validate({
         type: 'object',
         properties: {
+            publisherId: {
+                type: 'string',
+                items: { pattern: /^[\d]+$/ }
+            },
             xSlots: {
                 type: 'object',
                 properties: {
                     '*': {
                         type: 'object',
-                        placementId : {
+                        placementId: {
                             type: 'string',
-                            minLength: 1
-                        },
-                        publisherId : {
-                            type: 'string',
-                            items: {pattern: /^[\d]+$/}
+                            minLength: 1,
+                            optional: true
                         },
                         sizes: {
                             type: 'array',
-                            minLength : 1,
-                            items : {
+                            minLength: 1,
+                            items: {
                                 type: 'array',
                                 minLength: 2,
-                                items : {
-                                    type : 'integer'
+                                items: {
+                                    type: 'integer'
                                 }
                             }
                         }
@@ -72,6 +71,6 @@ var partnerValidator = function (configs) {
     }
 
     return null;
-};
+}
 
 module.exports = partnerValidator;
