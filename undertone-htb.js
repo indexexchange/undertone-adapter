@@ -74,6 +74,7 @@ function UndertoneHtb(configs) {
     /* Utilities
      * ---------------------------------- */
     var publisherId = configs.publisherId;
+    var adapterVersion = '1.1.0';
 
     function getPublisherId() {
         return publisherId;
@@ -203,8 +204,13 @@ function UndertoneHtb(configs) {
                 sizes: sizes
             });
         }
+
         var queryObj = {
-            'x-ut-hb-params': bidsArray
+            'x-ut-hb-params': bidsArray,
+            commons: {
+                adapterVersion: adapterVersion,
+                uids: returnParcels[0].identityData
+            }
         };
 
         /* ------------------------ Get consent information -------------------------
