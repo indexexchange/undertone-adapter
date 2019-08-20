@@ -26,6 +26,7 @@ var System = require('system.js');
 var Network = require('network.js');
 var Utilities = require('utilities.js');
 
+var ComplianceService;
 var RenderService;
 
 //? if (DEBUG) {
@@ -73,9 +74,28 @@ function UndertoneHtb(configs) {
     /* Utilities
      * ---------------------------------- */
     var publisherId = configs.publisherId;
+    var adapterVersion = '1.1.0';
 
     function getPublisherId() {
         return publisherId;
+    }
+
+    /**
+     * A utility function that returns the page canonical url if it exists and if the top level window is accessible.
+     * If not - null will be returned
+     * @returns {String} - a canonical url if it exists, otherwise null
+     */
+    function getCanonicalUrl() {
+        try {
+            var doc = window.top.document;
+            var element = doc.querySelector('link[rel="canonical"]');
+            if (element !== null) {
+                return element.href;
+            }
+        } catch (e) {
+        }
+
+        return null;
     }
 
     /**
@@ -158,7 +178,7 @@ function UndertoneHtb(configs) {
             xSlot.bidId = currBidId;
 
             var placementId = xSlot.placementId;
-            var pageUrl = Browser.getPageUrl();
+            var pageUrl = getCanonicalUrl() || Browser.getPageUrl();
             var hostname = Browser.getHostname();
             var domains = (/[-\w]+\.([-\w]+|[-\w]{3,}|[-\w]{1,3}\.[-\w]{2})$/i).exec(hostname);
             var domain = null;
@@ -184,8 +204,13 @@ function UndertoneHtb(configs) {
                 sizes: sizes
             });
         }
+
         var queryObj = {
-            'x-ut-hb-params': bidsArray
+            'x-ut-hb-params': bidsArray,
+            commons: {
+                adapterVersion: adapterVersion,
+                uids: returnParcels[0].identityData
+            }
         };
 
         /* ------------------------ Get consent information -------------------------
@@ -216,6 +241,12 @@ function UndertoneHtb(configs) {
         /* ---------------- Craft bid request using the above returnParcels --------- */
 
         /* ------- Put GDPR consent code here if you are implementing GDPR ---------- */
+
+        var gdprConsent = ComplianceService.gdpr.getConsent();
+        if (gdprConsent) {
+            var gdprValue = gdprConsent.applies ? 1 : 0;
+            requestUrl += '&gdpr=' + gdprValue + '&gdprstr=' + gdprConsent.consentString;
+        }
 
         /* -------------------------------------------------------------------------- */
 
@@ -421,6 +452,7 @@ function UndertoneHtb(configs) {
      * ---------------------------------- */
 
     (function __constructor() {
+        ComplianceService = SpaceCamp.services.ComplianceService;
         RenderService = SpaceCamp.services.RenderService;
 
         /* =============================================================================
